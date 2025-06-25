@@ -11,18 +11,32 @@ env:
 
 jobs:
   build-and-release:
-    runs-on: ubuntu-20.04
-    
+    runs-on: ubuntu-latest
+    container:
+      image: debian:bullseye
+
     permissions:
       contents: write
       packages: write
 
     steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y curl build-essential git ca-certificates
+
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          echo 'source ~/.cargo/env' >> ~/.bashrc
+
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Build release
-        run: cargo build --release --verbose
+        run: |
+          source ~/.cargo/env
+          cargo build --release --verbose
 
       - name: Create archive
         run: |
